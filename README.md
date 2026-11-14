@@ -1,6 +1,6 @@
-# Fine-Grained ViT Adaptation: AdaptFormer + LoRA under 5% of the Backbone
+# Fine-Grained Image Classification with ViT-B/16: Full and Parameter-Efficient Fine-Tuning
 
-Parameter-efficient fine-tuning of a ViT-B/16 for **10,000-class fine-grained image classification**
+**Full fine-tuning** and **parameter-efficient fine-tuning** of a ViT-B/16 for **10,000-class fine-grained image classification**
 (species photos, 45 labelled images per class) under a fixed compute budget. Built for the
 CS604 group project (Singapore Management University, MITB, 2026).
 
@@ -8,18 +8,34 @@ CS604 group project (Singapore Management University, MITB, 2026).
 
 | Track | Constraint | My best |
 | --- | --- | --- |
+| Full fine-tuning (Task 1) | none | **0.832** (0.8291 on the hidden Phase 2 test set) |
 | Parameter-efficient fine-tuning (Task 2) | at most 5% of backbone parameters trainable | **0.822** (AdaptFormer + LoRA, 4.94%) |
-| Full fine-tuning (Task 1) | none | **0.832** |
 
 Both tracks: the same ViT-B/16 backbone (`augreg2_in21k_ft_in1k`), 2 GPU-hours on a 48 GB card.
 
-![AdaptFormer recipe progression](docs/adaptformer_progress.png)
-
 ## What I built
 
-This repository is my own training and evaluation pipeline for the project. I owned the
-parameter-efficient track and the full fine-tuning recipe; teammates worked on LoRA-only, partial
-fine-tuning and the kNN re-ranker (credited below).
+This repository is my own training and evaluation pipeline for the project. I developed the
+recipes for both tracks; teammates worked on LoRA-only, partial fine-tuning and the kNN re-ranker
+(credited below).
+
+### Full fine-tuning
+
+![Full fine-tuning recipe progression](docs/full_ft_progress.png)
+
+- **Recipe**, built one controlled ablation at a time on the internal holdout:
+  - layer-wise learning-rate decay (0.75); without it, accuracy fell 6.7 points;
+  - a 10x learning rate for the classifier head (+1.5);
+  - the head initialized from class-mean features ("prototypes") instead of a linear probe, with a cosine classifier (+1.6);
+  - drop path 0.1, label smoothing 0.1, gradient clipping, and a cosine schedule fitted to the compute budget.
+    A constant learning rate instead cost 9 points.
+- **Resolution:** 224 → 336 px added 5.4 points on the holdout at equal epochs. At equal compute, 448 px
+  was best; 512 px added nothing more. The final 448 px run scored 0.825 on CodaBench, and 0.832 with
+  the zoom view below.
+
+### Parameter-efficient fine-tuning
+
+![AdaptFormer recipe progression](docs/adaptformer_progress.png)
 
 - **AdaptFormer from scratch** (`src/cs604/models/build.py`). Parallel bottleneck adapters are
   added to every MLP block. Three changes made it stronger, each kept only if it won its controlled
@@ -32,9 +48,10 @@ fine-tuning and the kNN re-ranker (credited below).
 - **"Look, then zoom in" at prediction time** (`src/cs604/engine/zoom.py`). A class-specific saliency map
   on the patch grid picks the smallest window holding 70% of the evidence. That window is
   re-classified from a 2x-resolution copy, with no retraining. It beat flip averaging at the same cost (+0.85 on the holdout,
-  +0.7 on CodaBench).
-- **Full fine-tuning recipe.** Prototype-initialized cosine head, layer-wise learning-rate decay (0.75), a 10x
-  head learning rate, drop path 0.1, and a cosine schedule fitted to the compute budget.
+  +0.7 on CodaBench). It helped both tracks.
+
+### Across both tracks
+
 - **Experiment discipline.**
   - A fixed internal holdout (5 images per class, all 10,000 classes).
   - A step-zero accuracy gate, so every run starts from the same verified model.
@@ -43,12 +60,13 @@ fine-tuning and the kNN re-ranker (credited below).
   - Every run records its resolved config, Git commit, hardware, parameter counts and timing.
 - **Engineering.** bf16 with gradient checkpointing, so ViT-B fits on a 16 GB laptop GPU. Resumable checkpoints
   restore the optimizer, scheduler and data position. Training stops on a compute budget measured in
-  GB-hours. 126 unit tests run without a GPU or the dataset.
+  GB-hours. 126 unit tests run without the dataset.
 
 ## Key findings
 
 | Question | Result |
 | --- | --- |
+| Full FT: what matters most in the recipe? | Layer-wise lr decay (−6.7 without it) and the cosine schedule (−9.0 with a constant lr); then a prototype-initialized head (+1.6) and a 10x head lr (+1.5) |
 | Do PCA init, normalized input, learned scale and margin help AdaptFormer? | +0.99 points at 3 epochs, a win at every epoch |
 | Does adding LoRA beat spending the same parameters on wider adapters? | **Yes: +0.59**, in both seeds |
 | Does AdaptFormer + LoRA beat LoRA alone at equal parameters? | No: +0.17, a tie. I report this rather than overclaim. |

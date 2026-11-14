@@ -1,4 +1,4 @@
-"""Draws docs/adaptformer_progress.png for the README from the logged results in docs/RESULTS.md.
+"""Draws the README figures (docs/*.png) from the logged results in docs/RESULTS.md.
 
 Dots, not bars: the axes start near the data, and a bar would exaggerate the gaps.
 """
@@ -55,20 +55,54 @@ def dot_panel(ax, rows, ref=None, ref_label=None, fmt="{:.2f}", title=""):
     ax.set_ylim(-0.6, len(rows) - 0.1)
 
 
-def main() -> None:
+def save(fig, name: str) -> None:
+    out = Path(__file__).resolve().parents[1] / "docs" / name
+    out.parent.mkdir(exist_ok=True)
+    fig.savefig(out, dpi=160, bbox_inches="tight", facecolor=SURFACE)
+    print(out)
+
+
+def two_panels():
     fig, (a, b) = plt.subplots(1, 2, figsize=(13, 4.6), facecolor=SURFACE,
                                gridspec_kw={"width_ratios": [1, 1.05], "wspace": 0.75})
     for ax in (a, b):
         ax.set_facecolor(SURFACE)
+    return fig, a, b
+
+
+# Full fine-tune, internal holdout, 3 epochs. Rows 1-3 at 224 px, row 4 at 336 px.
+FULL_HOLDOUT = [
+    ("Layer-wise lr decay 0.75, head at backbone lr", 69.83),
+    ("+ head lr 10x", 71.37),
+    ("+ head initialized from class prototypes", 72.98),
+    ("+ train at 336 px", 78.39),
+]
+
+# Full fine-tune on CodaBench validation, full 2-hour budget.
+FULL_CODABENCH = [
+    ("224 px, plain prediction", 0.757),
+    ("384 px, plain", 0.817),
+    ("448 px, plain", 0.825),
+    ("+ zoom view", 0.828),
+    ("+ crop 0.9 for the plain view", 0.832),
+]
+
+
+def main() -> None:
+    fig, a, b = two_panels()
     dot_panel(a, HOLDOUT, FULL_FT_3EP, "full fine-tune, same 3 epochs: 78.39 ",
               title="AdaptFormer recipe, internal holdout top-1 (%)")
     a.set_xlim(74.8, 78.8)
     dot_panel(b, CODABENCH, fmt="{:.3f}", title="PEFT track, CodaBench validation top-1")
     b.set_xlim(0.772, 0.828)
-    out = Path(__file__).resolve().parents[1] / "docs" / "adaptformer_progress.png"
-    out.parent.mkdir(exist_ok=True)
-    fig.savefig(out, dpi=160, bbox_inches="tight", facecolor=SURFACE)
-    print(out)
+    save(fig, "adaptformer_progress.png")
+
+    fig, a, b = two_panels()
+    dot_panel(a, FULL_HOLDOUT, title="Full fine-tune recipe, internal holdout top-1 (%)")
+    a.set_xlim(68.8, 79.4)
+    dot_panel(b, FULL_CODABENCH, fmt="{:.3f}", title="Full fine-tune track, CodaBench validation top-1")
+    b.set_xlim(0.748, 0.840)
+    save(fig, "full_ft_progress.png")
 
 
 if __name__ == "__main__":
