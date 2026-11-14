@@ -1,0 +1,12 @@
+# Install a CUDA build of PyTorch first: https://pytorch.org/get-started/locally/
+torch
+torchvision
+timm
+peft
+huggingface_hub
+hf_xet
+Pillow
+PyYAML
+tqdm
+numpy
+matplotlib  # only for scripts/plot_readme_figure.py

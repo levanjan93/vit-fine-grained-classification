@@ -1,0 +1,12 @@
+# Class prototypes for the locked backbone at 512 px (position embeddings resized by timm), for the
+# res_screen_512 arm.
+# Same protocol as prototype_init_448.yaml (37.20%): 40 training images/class, fixed 5/class holdout.
+# Result 2026-10-17: 33.85% (40 min at 8 workers).
+data_root: "data"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 512
+prototype_per_class: null
+val_per_class: 5
+split_seed: 604
+prototype_output: "outputs/prototypes_512/class_prototypes.pt"

@@ -1,0 +1,50 @@
+# AdaptFormer phase B (initialization): down starts from the whitened top-192 principal directions of each
+# adapter's input (16 training batches), instead of Kaiming-uniform. up stays zero (identity start; gate 42.53%).
+# Control: af_a_lr1e-3 (71.486% after 1 epoch; lr screen 3e-4 70.56, 1e-3 71.49, 3e-3 71.49, 1e-2 70.45 -> 1e-3 by the tie rule).
+# Same everything as the control except the line marked CHANGED. Design in docs/RESULTS.md.
+data_root: "data"
+output_dir: "outputs/af_b_pca"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: false
+adapter_dropout: 0.0
+adapter_input: residual
+adapter_init: pca  # CHANGED
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+evaluate_before_training: true
+expected_initial_accuracy: 0.4253
+initial_accuracy_tolerance: 0.001
+expected_initial_samples: 50000
+baseline_reference_split: "outputs/prototypes/splits/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 1
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.0
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 0
+synthetic: false
+resume: null
+prototype_file: "outputs/prototypes_336/class_prototypes.pt"

@@ -1,0 +1,25 @@
+# Colab launcher config. Images live on the VM disk; checkpoints live on Drive
+# so a disconnected session can resume.
+
+data_root: "/content/cs604-course-data"
+output_dir: "/content/drive/MyDrive/outputs/colab-full"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+
+# Safe default for a 24 GB Colab GPU. Raise batch_size on an A100 40 GB.
+batch_size: 16
+grad_accum: 2
+num_workers: 4
+epochs: 1
+max_steps: null
+limit_samples: null
+lr: 0.00005
+weight_decay: 0.05
+precision: bf16
+grad_checkpointing: true
+log_every: 20
+ckpt_every: 100
+seed: 0
+synthetic: false
+resume: null

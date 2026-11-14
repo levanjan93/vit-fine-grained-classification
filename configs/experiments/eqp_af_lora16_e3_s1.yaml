@@ -1,0 +1,60 @@
+# Equal-parameter controls for AdaptFormer + LoRA r16 (4.96%), Colab A100 (2026-11-03).
+# Same recipe, holdout (split seed 604, 40/5) and 3 epochs as af_lora_r16_e3; all four arms
+# and both seeds run on Colab so the comparison shares one GPU type and library version.
+# Arms: eqp_af_bn (AF w192 + biases/norms, 4.27%), eqp_af_lora16 (AF w192 + LoRA r16 qkv,
+# 4.96%), eqp_af224 (AF w224 + biases/norms, 4.96%), eqp_lora28 (no AF; LoRA r28 on
+# qkv/proj/fc1/fc2 + biases/norms, 4.95%). If eqp_af_lora16 beats both 4.96% controls,
+# the combination matters; if eqp_af224 ties it, the +0.57 was the extra parameters.
+# This arm: AF w192 + biases/norms + LoRA r16 qkv (laptop af_lora_r16_e3: 77.330). Seed 1.
+data_root: "/content/cs604-course-data"
+output_dir: "/content/drive/MyDrive/outputs/eqp_af_lora16_e3_s1"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: true
+adapter_dropout: 0.0
+adapter_input: norm
+adapter_init: pca
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+evaluate_before_training: true
+expected_initial_accuracy: 0.4253
+initial_accuracy_tolerance: 0.002
+expected_initial_samples: 50000
+baseline_reference_split: "/content/cs604-inputs/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 3
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.1
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 1
+synthetic: false
+resume: null
+prototype_file: "/content/cs604-inputs/class_prototypes_336.pt"
+adapter_train_bias: true
+adapter_train_norm: true
+adapter_lora: true
+lora_rank: 16
+lora_alpha: 32.0
+lora_dropout: 0.0

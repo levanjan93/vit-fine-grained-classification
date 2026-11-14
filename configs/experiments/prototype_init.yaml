@@ -1,0 +1,10 @@
+# Settings for the frozen class-prototype measurement.
+# Uses every labeled training image except the fixed 5-image internal holdout.
+data_root: "data"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+prototype_per_class: null
+val_per_class: 5
+split_seed: 604
+prototype_output: "outputs/prototypes/class_prototypes.pt"

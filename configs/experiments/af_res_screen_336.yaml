@@ -1,0 +1,51 @@
+# AdaptFormer resolution screen (2026-10-16): does the 384 gain of full FT (+0.86 on this screen,
+# +1.0 on CodaBench) carry over to Task 2? Arms af_res_screen_336 (control) and af_res_screen_384.
+# Recipe = af_bn_bias_norm_e3 (the Task 2 final: width 192, norm input, PCA init, learned scale,
+# CosFace 0.1, trainable biases + LayerNorms, 4.27% of the backbone). Setup = res_screen_*:
+# 10 training images/class, 0.48 x 48 GB-hours (1.45 h laptop; ~9.7 epochs at 336 at 187 img/s),
+# schedule fitted to the clock, no validation during training, last.pt scored with eval_tta.py.
+# Risk for a mostly frozen backbone: frozen 384 features are weaker (prototypes 40.47% vs 42.53%).
+data_root: "data"
+output_dir: "outputs/af_res_screen_336"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: true
+adapter_dropout: 0.0
+adapter_input: norm
+adapter_init: pca
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 40
+budget_48gb_hours: 0.48
+max_steps: null
+train_per_class: 10
+val_per_class: 5
+split_seed: 604
+validate: false
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.1
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 0
+synthetic: false
+resume: null
+prototype_file: "outputs/prototypes_336/class_prototypes.pt"
+adapter_train_bias: true
+adapter_train_norm: true

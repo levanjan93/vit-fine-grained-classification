@@ -1,0 +1,47 @@
+# Task 1 final full fine-tune (Colab A100 40 GB): the laptop-tuned recipe on all
+# 45 labelled images/class, for the full course budget (2 x 48 GB-hours = about
+# 2.4 h on a 40 GB card; the cosine schedule is fitted to the clock and `epochs`
+# is only an upper bound). No internal holdout (val_per_class: 0), so no
+# step-zero gate and no best.pt: predict from last.pt.
+# Recipe, from the laptop screens on the 40/5 split (docs/RESULTS.md,
+# "Task 1 full fine-tune"): prototype-initialized cosine head (full_proto_headlr10x,
+# 72.98% at 3 epochs), backbone lr 4e-4 with layer_decay 0.75, head lr 4e-3,
+# AdamW wd 0.05 with none on norms/biases/tokens, label smoothing 0.1, drop_path
+# 0.1, clip 1.0, effective batch 256, bf16, 5% warmup then cosine to zero, timm
+# default augmentation. The prototypes were built from the 40-image split.
+data_root: "/content/cs604-course-data"
+output_dir: "/content/drive/MyDrive/outputs/full_proto_final_45"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+mode: full
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+prototype_file: "/content/cs604-inputs/class_prototypes.pt"
+batch_size: 256
+eval_batch_size: 256
+grad_accum: 1
+num_workers: 10
+epochs: 30
+budget_48gb_hours: 2.0
+max_steps: null
+train_per_class: null
+val_per_class: 0
+split_seed: 604
+validate: false
+lr: 0.0004
+head_lr: 0.004
+layer_decay: 0.75
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+drop_path_rate: 0.1
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 2000
+seed: 0
+synthetic: false
+resume: null

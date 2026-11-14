@@ -1,0 +1,35 @@
+# CS604 group project: fine-grained 10,000-class classification.
+# Foundation model: IN21K -> IN1K fine-tuned ViT-B/16.
+# Training budget: 2 hours on 48 GB VRAM (or equivalent, e.g. 4 hours on 24 GB).
+
+data_root: "data"
+num_classes: 10000
+image_size: 224
+
+# timm id used by timm.models.vit_base_patch16_224(pretrained=True)
+timm_model: "vit_base_patch16_224"
+# Explicit checkpoint linked in the project brief
+timm_checkpoint: "timm/vit_base_patch16_224.augreg2_in21k_ft_in1k"
+hf_model: "google/vit-base-patch16-224"
+
+splits:
+  train:
+    list_file: "train.txt"
+    labeled: true
+    expected_samples: 450000
+    samples_per_class: 45
+  val:
+    list_file: "val.txt"
+    labeled: false
+    expected_samples: 50000
+    samples_per_class: 5
+  test:
+    list_file: "test.txt"
+    labeled: false
+    expected_samples: 100000
+    samples_per_class: 10
+
+submission:
+  phase1_name: "val_team_xx.txt"
+  phase2_name: "test_team_xx.txt"
+  line_format: "{image_path} {class_id}"

@@ -1,0 +1,11 @@
+# Class prototypes for the locked backbone at 336 px (position embeddings resized by timm), for full_proto_336_len3.
+# Same protocol as prototype_init.yaml (224 px, 43.90%): 40 training images/class, fixed 5/class holdout.
+# Result 2026-10-07: 42.534% (889 s, 506 img/s), holdout split byte-identical to the 224 build.
+data_root: "data"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+prototype_per_class: null
+val_per_class: 5
+split_seed: 604
+prototype_output: "outputs/prototypes_336/class_prototypes.pt"

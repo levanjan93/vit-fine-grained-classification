@@ -1,0 +1,49 @@
+# AdaptFormer resolution screen, third point (2026-10-18): af_res_screen_384 at 448 px.
+# af_res_screen_384 beat 336 by +1.55 at crop 0.9 (CodaBench +0.5 with zoom); full FT gained a
+# further +0.73 from 384 to 448 on its screen (CodaBench 0.824 -> 0.828). 448 costs ~1.4x per
+# image of 384 (784 vs 576 tokens), so expect ~4.5 epochs in the 0.48 x 48 GB-hour budget.
+# Batch 32 x 8 (same effective 256) as res_screen_448, for memory headroom on the 16 GB laptop.
+data_root: "data"
+output_dir: "outputs/af_res_screen_448"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 448  # CHANGED
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: true
+adapter_dropout: 0.0
+adapter_input: norm
+adapter_init: pca
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+batch_size: 32  # CHANGED
+eval_batch_size: 64  # CHANGED
+grad_accum: 8  # CHANGED
+num_workers: 12
+epochs: 40
+budget_48gb_hours: 0.48
+max_steps: null
+train_per_class: 10
+val_per_class: 5
+split_seed: 604
+validate: false
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.1
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 0
+synthetic: false
+resume: null
+prototype_file: "outputs/prototypes_448/class_prototypes.pt"  # CHANGED
+adapter_train_bias: true
+adapter_train_norm: true

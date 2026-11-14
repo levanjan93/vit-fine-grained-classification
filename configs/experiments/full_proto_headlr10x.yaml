@@ -1,0 +1,46 @@
+# Ablation for LP-FT: the base recipe started from the raw class prototypes (43.90%) instead of the trained
+# linear-probe head (60.37%). Only the head initialization (and its step-zero gate) differs from full_lpft_b_headlr10x.
+# Base recipe = full_lpft_b_headlr10x (71.37% at 3 epochs): backbone lr 4e-4, head lr 4e-3, layer_decay 0.75, wd 0.05
+# (none on norms/biases/tokens), label smoothing 0.1, drop_path 0.1, clip 1.0, batch 64 x 4 = 256, bf16, 5% warmup then
+# cosine to zero, timm default augmentation (Round C: crop 0.35 71.11%, no jitter 71.29%, both within noise).
+# 40 images/class, fixed 5/class holdout.
+data_root: "data"
+output_dir: "outputs/full_proto_headlr10x"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+mode: full
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+evaluate_before_training: true
+expected_initial_accuracy: 0.439
+initial_accuracy_tolerance: 0.001
+expected_initial_samples: 50000
+baseline_reference_split: "outputs/prototypes/splits/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 3
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.0004
+layer_decay: 0.75
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+drop_path_rate: 0.1
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 1000
+seed: 0
+synthetic: false
+resume: null
+head_lr: 0.004
+prototype_file: "outputs/prototypes/class_prototypes.pt"

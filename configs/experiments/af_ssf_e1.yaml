@@ -1,0 +1,55 @@
+# AdaptFormer + SSF, 1 epoch (2026-10-20): af_bn_bias_norm_e1 with SSF (a learned per-channel
+# scale and shift after the patch embedding, every block's norm1/qkv/proj/norm2/fc1/fc2 and the
+# final norm; 205,824) in place of the trainable pretrained biases and LayerNorm weights
+# (122,112). Backbone 3,550,476 + 205,824 = 3,756,300 = 4.37% (limit 5%). SSF at the adapter lr
+# 1e-3 (SSF alone: 3e-3 71.902, 1e-3 71.560, a tie). Identity init: the step-zero gate and the
+# PCA calibration are unchanged. Compare with af_bn_bias_norm_e1 (72.966) and af_bn_control_e1
+# (72.396).
+data_root: "data"
+output_dir: "outputs/af_ssf_e1"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: true
+adapter_dropout: 0.0
+adapter_input: norm
+adapter_init: pca
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+evaluate_before_training: true
+expected_initial_accuracy: 0.4253
+initial_accuracy_tolerance: 0.001
+expected_initial_samples: 50000
+baseline_reference_split: "outputs/prototypes/splits/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 1
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.1
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 0
+synthetic: false
+resume: null
+prototype_file: "outputs/prototypes_336/class_prototypes.pt"
+adapter_ssf: true  # CHANGED (replaces adapter_train_bias/adapter_train_norm)
+ssf_init: identity

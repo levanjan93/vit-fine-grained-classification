@@ -1,0 +1,25 @@
+# Full fine-tune on the desktop RTX 5080 (16 GB).
+# 16 GB is below the course 24 GB / 48 GB examples, so the batch is small
+# and gradients accumulate. Record the GPU name and hours from hardware.json.
+
+data_root: "data"
+output_dir: "outputs/local-full"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+
+batch_size: 8
+grad_accum: 4
+num_workers: 2
+epochs: 1
+max_steps: null
+limit_samples: null
+lr: 0.00005
+weight_decay: 0.05
+precision: bf16
+grad_checkpointing: true
+log_every: 20
+ckpt_every: 100
+seed: 0
+synthetic: false
+resume: null

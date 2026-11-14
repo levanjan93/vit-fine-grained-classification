@@ -1,0 +1,55 @@
+# AdaptFormer + biases/norms + LoRA rank 16, 3 epochs (2026-10-21): af_bn_bias_norm_e3 (the Task 2
+# recipe, 76.756) plus LoRA rank 16 / alpha 32 on every qkv (1 epoch: af_lora_r16_e1 73.744 vs
+# 72.966, +0.78). Backbone 4,262,412 = 4.96% (limit 5%). Does the 1-epoch gain hold at 3 epochs?
+data_root: "data"
+output_dir: "outputs/af_lora_r16_e3"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: adaptformer
+adapter_dim: 192
+adapter_scale: 0.1
+adapter_scale_trainable: true
+adapter_dropout: 0.0
+adapter_input: norm
+adapter_init: pca
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+evaluate_before_training: true
+expected_initial_accuracy: 0.4253
+initial_accuracy_tolerance: 0.001
+expected_initial_samples: 50000
+baseline_reference_split: "outputs/prototypes/splits/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 3  # CHANGED
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.001
+head_lr: 0.004
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+cosine_margin: 0.1
+drop_path_rate: 0.0
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 500
+seed: 0
+synthetic: false
+resume: null
+prototype_file: "outputs/prototypes_336/class_prototypes.pt"
+adapter_train_bias: true  # CHANGED
+adapter_train_norm: true  # CHANGED
+adapter_lora: true  # CHANGED
+lora_rank: 16  # CHANGED
+lora_alpha: 32.0  # CHANGED
+lora_dropout: 0.0

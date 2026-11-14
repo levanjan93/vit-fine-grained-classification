@@ -1,0 +1,44 @@
+# LP-FT Round B: no layer-wise LR decay (every layer at 4e-4); only layer_decay differs from full_lpft_b_control.
+# Round A (1 epoch) chose backbone lr 4e-4 (5e-5 66.24%, 1e-4 66.82%, 2e-4 67.22%, 4e-4 67.47%, 8e-4 67.34%).
+# Three epochs on 40 images/class, fixed 5/class holdout; head from the linear probe r1_lr3e-3_ls01 (60.37% gate).
+# Recipe: layer_decay 0.75, wd 0.05 (none on norms/biases/tokens), label smoothing 0.1, drop_path 0.1, clip 1.0,
+# batch 64 x 4 = 256, bf16, 5% warmup then cosine to zero.
+data_root: "data"
+output_dir: "outputs/full_lpft_b_nolayerdecay"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 224
+mode: full
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+head_init_file: "outputs/head_sweep_augreg2/points/r1_lr3e-3_ls01.head.pt"
+evaluate_before_training: true
+expected_initial_accuracy: 0.6037
+initial_accuracy_tolerance: 0.001
+expected_initial_samples: 50000
+baseline_reference_split: "outputs/prototypes/splits/internal_val.txt"
+batch_size: 64
+eval_batch_size: 128
+grad_accum: 4
+num_workers: 12
+epochs: 3
+max_steps: null
+train_per_class: null
+val_per_class: 5
+split_seed: 604
+validate: true
+lr: 0.0004
+layer_decay: null
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+drop_path_rate: 0.1
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 1000
+seed: 0
+synthetic: false
+resume: null

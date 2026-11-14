@@ -1,0 +1,44 @@
+# Control arm: the current final recipe at 336 px.
+# Resolution screen (2026-10-15): which training resolution wins at EQUAL COMPUTE, at about the epoch
+# count of a real final run. Arms: res_screen_336 (control), res_screen_384, res_screen_224to384.
+# Scale-down of the A100 final (450k images, ~8.5 epochs at 336 in 2.4 h): 10 training images/class
+# (100k), and a budget of 0.48 x 48 GB-hours = 1.45 h on the laptop (15.92 GB), which is ~8.5 epochs
+# at 336 (163 img/s, full_proto_336_len3). The lr schedule is fitted to the clock, as in the final.
+# No per-epoch validation (it would eat the budget unequally across resolutions); score last.pt
+# afterwards with scripts/eval_tta.py on the fixed 5/class holdout. Recipe otherwise = the final.
+data_root: "data"
+output_dir: "outputs/res_screen_336"
+timm_checkpoint: "vit_base_patch16_224.augreg2_in21k_ft_in1k"
+num_classes: 10000
+image_size: 336
+mode: full
+head_type: cosine
+cosine_head_fp32: true
+train_head: true
+prototype_file: "outputs/prototypes_336/class_prototypes.pt"
+batch_size: 32
+eval_batch_size: 64
+grad_accum: 8
+num_workers: 12
+epochs: 40
+budget_48gb_hours: 0.48
+max_steps: null
+train_per_class: 10
+val_per_class: 5
+split_seed: 604
+validate: false
+lr: 0.0004
+head_lr: 0.004
+layer_decay: 0.75
+no_decay_norm_bias: true
+weight_decay: 0.05
+label_smoothing: 0.1
+drop_path_rate: 0.1
+clip_grad_norm: 1.0
+precision: bf16
+grad_checkpointing: false
+log_every: 50
+ckpt_every: 1000
+seed: 0
+synthetic: false
+resume: null

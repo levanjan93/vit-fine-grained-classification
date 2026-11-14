@@ -1,0 +1,17 @@
+# Dataset (~45 GB) and training outputs
+/data/
+outputs/
+wandb/
+runs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
